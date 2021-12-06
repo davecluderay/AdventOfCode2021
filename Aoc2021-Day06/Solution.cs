@@ -6,9 +6,7 @@ internal class Solution
 
     public object? PartOne()
     {
-        var initialTimers = InputFile.ReadAllText()
-                                     .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                     .Select(s => Convert.ToInt32(s));
+        var initialTimers = ReadInitialTimers();
         return SimulateFishPopulation(initialTimers, 80);
     }
 
