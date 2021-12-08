@@ -6,14 +6,14 @@ internal class Solution
 
     public object? PartOne()
     {
-        long calculateMovementFuelCost(int distance) => distance;
-        return FindLowestAlignmentFuelCost(calculateMovementFuelCost);
+        long CalculateMovementFuelCost(int distance) => distance;
+        return FindLowestAlignmentFuelCost(CalculateMovementFuelCost);
     }
 
     public object? PartTwo()
     {
-        long calculateMovementFuelCost(int distance) => Enumerable.Range(1, distance).Sum();
-        return FindLowestAlignmentFuelCost(calculateMovementFuelCost);
+        long CalculateMovementFuelCost(int distance) => Enumerable.Range(1, distance).Sum();
+        return FindLowestAlignmentFuelCost(CalculateMovementFuelCost);
     }
 
     private static long FindLowestAlignmentFuelCost(Func<int, long> calculateMovementFuelCost)
