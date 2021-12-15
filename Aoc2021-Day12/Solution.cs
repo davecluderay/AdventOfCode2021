@@ -43,7 +43,7 @@ internal class Solution
         return caves.Values.ToArray();
     }
 
-    private static IEnumerable<IEnumerable<Cave>> FindPaths(Cave current, Cave allowTwoVisitsTo = null, IEnumerable<Cave>? visited = null)
+    private static IEnumerable<IEnumerable<Cave>> FindPaths(Cave current, Cave? allowTwoVisitsTo = null, IEnumerable<Cave>? visited = null)
     {
         visited ??= Enumerable.Empty<Cave>();
 
