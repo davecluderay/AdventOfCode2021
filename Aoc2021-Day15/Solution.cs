@@ -7,88 +7,85 @@ internal class Solution
     public object? PartOne()
     {
         var map = ReadMapFromFile();
-        return FindLowestRiskPath(map, (0, 0), (map.GetLength(0) - 1, map.GetLength(1) - 1));
+        return FindLowestRiskPath(map, from: (0, 0), to: (map.Max(t => t.Position.X), map.Max(t => t.Position.Y)));
     }
 
     public object? PartTwo()
     {
         var map = ReadMapFromFile();
         map = ExpandMap(map, factor: 5);
-        return FindLowestRiskPath(map, (0, 0), (map.GetLength(0) - 1, map.GetLength(1) - 1));
+        return FindLowestRiskPath(map, (0, 0), (map.Max(t => t.Position.X), map.Max(t => t.Position.Y)));
     }
 
-    private static int[,] ReadMapFromFile()
-    {
-        var lines = InputFile.ReadAllLines();
-        var map = new int[lines.First().Length, lines.Length];
-        for(var x = 0; x < map.GetLength(0); x++)
-        for (var y = 0; y < map.GetLength(1); y++)
-            map[x, y] = lines[y][x] - '0';
-        return map;
-    }
+    private static IReadOnlyCollection<MapTile> ReadMapFromFile()
+        => InputFile.ReadAllLines()
+                    .SelectMany((line, y) => line.Select((@char, x) => new MapTile((x, y), @char - '0')))
+                    .ToArray();
 
-    private static int[,] ExpandMap(int[,] original, int factor)
+    private static IReadOnlyCollection<MapTile> ExpandMap(IReadOnlyCollection<MapTile> map, int factor)
     {
-        var newMap = new int[original.GetLength(0) * factor, original.GetLength(1) * factor];
+        var width = map.Max(t => t.Position.X) + 1;
+        var height = map.Max(t => t.Position.Y) + 1;
 
-        for (var x = 0; x < original.GetLength(0); x++)
-        for (var y = 0; y < original.GetLength(1); y++)
+        var newMap = new List<MapTile>(map.Count * factor * factor);
+        foreach (var ((x, y), risk) in map)
         {
             for (var dx = 0; dx < factor; dx++)
             for (var dy = 0; dy < factor; dy++)
             {
-                var newX = x + dx * original.GetLength(0);
-                var newY = y + dy * original.GetLength(1);
-                var newValue = (original[x, y] + dx + dy);
+                var newX = x + dx * width;
+                var newY = y + dy * height;
+                var newValue = risk + dx + dy;
                 while (newValue > 9) newValue -= 9;
-                newMap[newX, newY] = newValue;
+                newMap.Add(new MapTile((newX, newY), newValue));
             }
         }
 
-        return newMap;
+        return newMap.AsReadOnly();
     }
 
-    private static int FindLowestRiskPath(int[,] map, (int x, int y) from, (int x, int y) to)
+    private static int FindLowestRiskPath(IReadOnlyCollection<MapTile> map, (int x, int y) from, (int x, int y) to)
     {
-        var visited = new HashSet<(int x, int y)>();
-        var nextCandidates = new HashSet<(int x, int y)>();
+        var maxX = map.Max(t => t.Position.X);
+        var maxY = map.Max(t => t.Position.Y);
+        var nodes = map.ToDictionary(t => t.Position);
 
         var lowestRiskPaths = new Dictionary<(int x, int y), int>
         {
             [from] = 0
         };
 
-        var current = from;
-        while (visited.Count < map.Length)
+        var next = new PriorityQueue<MapTile, int>();
+        next.Enqueue(nodes[from], 0);
+
+        while (next.Count > 0)
         {
-            visited.Add(current);
-            if (current == to) break;
+            var current = next.Dequeue();
+            
+            if (current.Position == to) break;
 
-            var lowestRiskToCurrent = lowestRiskPaths.GetValueOrDefault(current, int.MaxValue);
-
-            var unvisitedNeighbours = GetNeighbourPositions(map, current).Where(p => !visited.Contains(p)).ToArray();
-            foreach (var n in unvisitedNeighbours)
+            foreach (var v in GetNeighbourPositions(current.Position))
             {
-                var risk = map[n.x, n.y];
-                lowestRiskPaths[n] = Math.Min(lowestRiskPaths.GetValueOrDefault(n, int.MaxValue), lowestRiskToCurrent + risk);
-                nextCandidates.Add(n);
+                var totalRisk = lowestRiskPaths[current.Position] + nodes[v].Risk;
+                if (totalRisk < lowestRiskPaths.GetValueOrDefault(v, int.MaxValue))
+                {
+                    lowestRiskPaths[v] = totalRisk;
+                    next.Enqueue(nodes[v], totalRisk);
+                }
             }
-
-            current = nextCandidates.OrderBy(c => (long)lowestRiskPaths.GetValueOrDefault(c, int.MaxValue)).First();
-            nextCandidates.Remove(current);
         }
 
-        return lowestRiskPaths.GetValueOrDefault(to, int.MaxValue);
+        return lowestRiskPaths[to];
+        
+        IEnumerable<(int x, int y)> GetNeighbourPositions((int x, int y) position)
+                                       {
+                                           var (x, y) = position;
+                                           if (x > 0) yield return (x - 1, y);
+                                           if (x < maxX) yield return (x + 1, y);
+                                           if (y > 0) yield return (x, y - 1);
+                                           if ( y < maxY) yield return (x, y + 1);
+                                       }
     }
 
-    private static IEnumerable<(int x, int y)> GetNeighbourPositions(int[,] map, (int x, int y) position)
-    {
-        var (maxX, maxY) = (map.GetLength(0) - 1, map.GetLength(1) - 1);
-        var (x, y) = position;
-
-        if (x > 0) yield return (x - 1, y);
-        if (x < maxX) yield return (x + 1, y);
-        if (y > 0) yield return (x, y - 1);
-        if ( y < maxY) yield return (x, y + 1);
-    }
+    private record MapTile((int X, int Y) Position, int Risk = 1);
 }
