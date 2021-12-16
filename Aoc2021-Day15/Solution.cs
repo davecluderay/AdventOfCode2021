@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace Aoc2021_Day15;
 
 internal class Solution
@@ -7,28 +9,31 @@ internal class Solution
     public object? PartOne()
     {
         var map = ReadMapFromFile();
-        return FindLowestRiskPath(map, from: (0, 0), to: (map.Max(t => t.Position.X), map.Max(t => t.Position.Y)));
+        return FindLowestRiskPath(map);
     }
 
     public object? PartTwo()
     {
         var map = ReadMapFromFile();
         map = ExpandMap(map, factor: 5);
-        return FindLowestRiskPath(map, (0, 0), (map.Max(t => t.Position.X), map.Max(t => t.Position.Y)));
+        return FindLowestRiskPath(map);
     }
 
-    private static IReadOnlyCollection<MapTile> ReadMapFromFile()
-        => InputFile.ReadAllLines()
-                    .SelectMany((line, y) => line.Select((@char, x) => new MapTile((x, y), @char - '0')))
-                    .ToArray();
-
-    private static IReadOnlyCollection<MapTile> ExpandMap(IReadOnlyCollection<MapTile> map, int factor)
+    private static Map ReadMapFromFile()
     {
-        var width = map.Max(t => t.Position.X) + 1;
-        var height = map.Max(t => t.Position.Y) + 1;
+        var tiles = InputFile.ReadAllLines()
+                             .SelectMany((line, y) => line.Select((@char, x) => new MapTile((x, y), @char - '0')))
+                             .ToImmutableArray();
+        return new Map(tiles, tiles.First(), tiles.Last());
+    }
 
-        var newMap = new List<MapTile>(map.Count * factor * factor);
-        foreach (var ((x, y), risk) in map)
+    private static Map ExpandMap(Map map, int factor)
+    {
+        var width = map.End.Position.X + 1;
+        var height = map.End.Position.Y + 1;
+
+        var tiles = new List<MapTile>(map.Tiles.Count * factor * factor);
+        foreach (var ((x, y), risk) in map.Tiles)
         {
             for (var dx = 0; dx < factor; dx++)
             for (var dy = 0; dy < factor; dy++)
@@ -37,18 +42,22 @@ internal class Solution
                 var newY = y + dy * height;
                 var newValue = risk + dx + dy;
                 while (newValue > 9) newValue -= 9;
-                newMap.Add(new MapTile((newX, newY), newValue));
+                tiles.Add(new MapTile((newX, newY), newValue));
             }
         }
 
-        return newMap.AsReadOnly();
+        return new Map(tiles, tiles.First(), tiles.Last());
     }
 
-    private static int FindLowestRiskPath(IReadOnlyCollection<MapTile> map, (int x, int y) from, (int x, int y) to)
+    private static int FindLowestRiskPath(Map map)
     {
-        var maxX = map.Max(t => t.Position.X);
-        var maxY = map.Max(t => t.Position.Y);
-        var nodes = map.ToDictionary(t => t.Position);
+        var from = map.Start.Position;
+        var to = map.End.Position;
+
+        var maxX = map.Tiles.Max(t => t.Position.X);
+        var maxY = map.Tiles.Max(t => t.Position.Y);
+
+        var nodes = map.Tiles.ToDictionary(t => t.Position);
 
         var lowestRiskPaths = new Dictionary<(int x, int y), int>
         {
@@ -87,5 +96,6 @@ internal class Solution
                                        }
     }
 
+    private record Map(IReadOnlyCollection<MapTile> Tiles, MapTile Start, MapTile End);
     private record MapTile((int X, int Y) Position, int Risk = 1);
 }
