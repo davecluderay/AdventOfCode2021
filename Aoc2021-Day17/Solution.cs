@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 namespace Aoc2021_Day17;
 
 internal class Solution
@@ -8,7 +6,7 @@ internal class Solution
 
     public object? PartOne()
     {
-        var targetArea = ReadTargetAreaFromFile();
+        var targetArea = TargetArea.ReadFromFile();
         var velocities = FindValidInitialVelocities(targetArea);
         var best = velocities.OrderByDescending(v => v.Y).First();
         var maximumHeight = Enumerable.Range(0, best.Y)
@@ -18,26 +16,9 @@ internal class Solution
 
     public object? PartTwo()
     {
-        var targetArea = ReadTargetAreaFromFile();
+        var targetArea = TargetArea.ReadFromFile();
         var velocities = FindValidInitialVelocities(targetArea);
         return velocities.Length;
-    }
-
-    private static TargetArea ReadTargetAreaFromFile()
-    {
-        var match = InputFile.ReadAllLines()
-                             .Select(line => Regex.Match(line, @"^target area: x=(?<MinX>-?\d+)\.\.(?<MaxX>-?\d+), y=(?<MinY>-?\d+)\.\.(?<MaxY>-?\d+)"))
-                             .Single(m => m.Success);
-
-        var target = new TargetArea(Convert.ToInt32(match.Groups["MinX"].Value),
-                                    Convert.ToInt32(match.Groups["MaxX"].Value),
-                                    Convert.ToInt32(match.Groups["MinY"].Value),
-                                    Convert.ToInt32(match.Groups["MaxY"].Value));
-
-        if (target.MinX < 0 || target.MaxX < 0) throw new NotSupportedException("Solution assumes the target area is in the positive x-axis.");
-        if (target.MinY > 0 || target.MaxY > 0) throw new NotSupportedException("Solution assumes the target area is in the negative y-axis.");
-
-        return target;
     }
 
     private static (int X, int Y)[] FindValidInitialVelocities(TargetArea targetArea)
@@ -98,6 +79,4 @@ internal class Solution
         var remaining = (initialVelocity - steps) * (initialVelocity - steps + 1) / 2;
         return max - remaining;
     }
-
-    private record TargetArea(int MinX, int MaxX, int MinY, int MaxY);
 }
