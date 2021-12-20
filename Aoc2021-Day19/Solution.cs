@@ -22,8 +22,8 @@ internal class Solution
                                      .ToArray();
         BuildBeaconMap(scannerData);
         return scannerData.InPairs()
-                          .Max(s => CalculateDistance(s.First.Position.Value,
-                                                      s.Second.Position.Value));
+                          .Max(s => CalculateDistance(s.First.Position,
+                                                      s.Second.Position));
     }
 
     private static HashSet<(int X, int Y, int Z)> BuildBeaconMap(ScannerData[] scannerData)

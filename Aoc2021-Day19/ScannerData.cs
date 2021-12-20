@@ -8,7 +8,7 @@ internal record ScannerData(int ScannerId, (int X, int Y, int Z)[] Beacons)
     private static readonly Regex ScannerPattern = new (@"^--- scanner (?<ID>\d+) ---\r?$", RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.Multiline);
     private static readonly Regex BeaconPattern = new (@"^(?<X>-?\d+),(?<Y>-?\d+),(?<Z>-?\d+)\r?$", RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.Multiline);
 
-    public (int X, int Y, int Z)? Position { get; set; }
+    public (int X, int Y, int Z) Position { get; set; }
     public static ScannerData[] ReadFromInputFile()
     {
         return EmptyLinePattern.Split(InputFile.ReadAllText())
@@ -24,7 +24,6 @@ internal record ScannerData(int ScannerId, (int X, int Y, int Z)[] Beacons)
                                                  Convert.ToInt32(m.Groups["Y"].Value),
                                                  Convert.ToInt32(m.Groups["Z"].Value)))
                                    .ToArray();
-        var location = scannerId == 0 ? (0, 0, 0) : ((int,int,int)?)null;
-        return new ScannerData(scannerId, beacons) { Position = location };
+        return new ScannerData(scannerId, beacons) { Position = (0, 0, 0) };
     }
 }

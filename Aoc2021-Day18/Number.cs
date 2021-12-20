@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Aoc2021_Day18;
 
 internal sealed class NumberPair : Number
@@ -77,7 +79,7 @@ internal abstract class Number
 
         if (number is RegularNumber) yield break;
 
-        var pair = number as NumberPair;
+        var pair = (NumberPair)number;
 
         foreach (var (num, depth) in GetAllElements(pair.Left))
             yield return (num, depth + 1);
