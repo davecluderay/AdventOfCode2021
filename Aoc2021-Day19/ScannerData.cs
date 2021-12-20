@@ -5,8 +5,8 @@ namespace Aoc2021_Day19;
 internal record ScannerData(int ScannerId, (int X, int Y, int Z)[] Beacons)
 {
     private static readonly Regex EmptyLinePattern = new (@"\r?\n\r?\n", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
-    private static readonly Regex ScannerPattern = new (@"^--- scanner (?<ID>\d+) ---$", RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.Multiline);
-    private static readonly Regex BeaconPattern = new (@"^(?<X>-?\d+),(?<Y>-?\d+),(?<Z>-?\d+)$", RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.Multiline);
+    private static readonly Regex ScannerPattern = new (@"^--- scanner (?<ID>\d+) ---\r?$", RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.Multiline);
+    private static readonly Regex BeaconPattern = new (@"^(?<X>-?\d+),(?<Y>-?\d+),(?<Z>-?\d+)\r?$", RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.Multiline);
 
     public (int X, int Y, int Z)? Position { get; set; }
     public static ScannerData[] ReadFromInputFile()
