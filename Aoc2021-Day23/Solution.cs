@@ -42,7 +42,6 @@ internal class Solution
             }
 
             var lowestEnergyCostToComplete = long.MaxValue;
-            var didRecurse = false;
 
             foreach (var amphipod in amphipods.Where(a => !state.IsRoomFor(a.Position, a.Type) || !state.IsRoomClearOfOtherAmphipodTypes(a.Type)))
             foreach (var nextPosition in state.FindReachableSpaces(amphipod.Position))
