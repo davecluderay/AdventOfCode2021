@@ -42,19 +42,19 @@ internal class Solution
         var depth = 0;
         var aim = 0;
 
-        foreach (var instruction in instructions)
+        foreach (var (action, value) in instructions)
         {
-            switch (instruction.Action)
+            switch (action)
             {
                 case "up":
-                    aim -= instruction.Value;
+                    aim -= value;
                     break;
                 case "down":
-                    aim += instruction.Value;
+                    aim += value;
                     break;
                 case "forward":
-                    horizontal += instruction.Value;
-                    depth += aim * instruction.Value;
+                    horizontal += value;
+                    depth += aim * value;
                     break;
             }
         }
